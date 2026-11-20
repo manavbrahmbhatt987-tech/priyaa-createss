@@ -560,6 +560,25 @@
       .custom-note a { color: var(--accent); font-weight: 800; text-decoration: none; }
       .custom-note a:hover { text-decoration: underline; }
 
+      /* ---------- Common order form: item picker ---------- */
+      .items-head { margin-top: 1.1rem; }
+      .items-head .form-picker-label { margin-bottom: 0.2rem; }
+      .items-hint { font-size: 0.82rem; color: var(--ink-soft); margin: 0 0 0.4rem; }
+      .item-group-title {
+        font-size: 0.75rem; font-weight: 800; letter-spacing: 0.13em; text-transform: uppercase;
+        color: var(--sage); margin: 1rem 0 0.2rem;
+      }
+      .pick-row {
+        display: flex; align-items: center; gap: 0.7rem;
+        padding: 0.55rem 0; border-bottom: 1px solid var(--line);
+      }
+      .pick-row .pick-name { font-weight: 700; font-size: 0.93rem; line-height: 1.3; }
+      .pick-row .pick-name small { display: block; font-weight: 600; color: var(--ink-soft); font-size: 0.78rem; }
+      .pick-row .qty { margin-left: auto; flex: none; }
+      .pick-row.is-selected .pick-name { color: var(--accent); }
+      .items-summary { font-size: 0.88rem; font-weight: 700; color: var(--ink-soft); margin: 0.7rem 0 0; }
+      .items-summary strong { color: var(--accent); }
+
       /* ---------- Toast ---------- */
       .toast {
         position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 80px); z-index: 70;
@@ -656,7 +675,7 @@
               <span class="step-num">2</span>
               <div>
                 <h3>Fill in the form</h3>
-                <p>One form per category. Priya confirms price &amp; timing from it.</p>
+                <p>One form for your whole order — items, quantities and your details, just once. Priya confirms price &amp; timing from it.</p>
               </div>
             </div>
             <div class="step">
@@ -691,7 +710,7 @@
               Way 2 · Your own picture
             </span>
             <h3>Send a photo of your idea</h3>
-            <p>Paste its link in the Customised Products order form — Priya makes it your way.</p>
+            <p>Paste its link in the order form — one form for everything — and Priya makes it your way.</p>
             <button class="btn btn-solid" type="button" data-open-chat data-open-cat="customised" data-prefill="Hi Priya! I found a design I love — I'll paste a link to its picture in the form. Can you make something like this for me?">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.3 8.3 0 0 1-3.8-.9L3 20l1-5A8.4 8.4 0 1 1 21 11.5z"/></svg>
               Send your picture
@@ -813,7 +832,7 @@
       </div>
       <div class="drawer-body">
         <p class="drawer-note">
-          <strong>Made to order.</strong> Each category has its own short order form on this site — fill it in and your order goes straight to Priya.
+          <strong>Made to order.</strong> One order form covers everything — check your items and quantities below, add your details once, and your order goes straight to Priya.
         </p>
         <div id="orderItems"></div>
         <div id="orderFormWrap">
@@ -836,8 +855,8 @@
         <div class="chat-head-who">
           <span class="chat-avatar" aria-hidden="true">P</span>
           <div>
-            <h2 id="chatTitle">Chat with Priya</h2>
-            <p>Order forms · one per category</p>
+            <h2 id="chatTitle">Order form</h2>
+            <p>One form for everything</p>
           </div>
         </div>
         <button class="icon-btn" id="closeChat" type="button" aria-label="Close chat panel">
@@ -845,16 +864,7 @@
         </button>
       </div>
       <div class="chat-body">
-        <p class="chat-greeting">Hi, I'm Priya! 🌸 Everything is handmade by me, to order. Pick what you're ordering, fill in its short form, and send your order to me. Got your own picture? Add its link in the form and I'll make it.</p>
-        <p class="form-picker-label" id="formPickerLabel">What are you ordering?</p>
-        <div class="form-picker" id="formPicker" role="group" aria-labelledby="formPickerLabel">
-          <button type="button" data-form-cat="bouquets" aria-pressed="true">Flower Bouquets</button>
-          <button type="button" data-form-cat="cases" aria-pressed="false">Custom Phone Cases</button>
-          <button type="button" data-form-cat="henna" aria-pressed="false">Henna (Mehndi)</button>
-          <button type="button" data-form-cat="sketches" aria-pressed="false">Art &amp; Sketches</button>
-          <button type="button" data-form-cat="accessories" aria-pressed="false">Accessories &amp; More</button>
-          <button type="button" data-form-cat="customised" aria-pressed="false">Customised Products</button>
-        </div>
+        <p class="chat-greeting">Hi, I'm Priya! 🌸 Everything is handmade by me, to order. Pick your items below and how many of each, add your details once, and send your order to me. Got your own picture or a custom idea? Add it under Customised Products and paste its link in the notes.</p>
         <div id="orderFormFields"></div>
         <button class="chat-send" id="chatSubmit" type="button">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
@@ -922,179 +932,29 @@
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script>
-      var ORDER_FORMS = {
-        bouquets: {
-          label: "Flower Bouquets",
-          fields: [
-            { key: "name", label: "Your name", type: "text", autocomplete: "name", required: true },
-            { key: "phone", label: "Your phone number", type: "tel", autocomplete: "tel", required: true },
-            { key: "instagram", label: "Your Instagram handle (optional)", type: "text", placeholder: "@yourhandle" },
-            { key: "email", label: "Your email (optional)", type: "email", placeholder: "you@example.com", autocomplete: "email" },
-            { key: "item", label: "Which bouquet would you like?", type: "select", item: true, options: ["Pink Lily Bouquet", "Purple Birthday Bouquet", "Plush & Flower Bouquet", "Flower Pot", "Something custom"] },
-            { key: "occasion", label: "Occasion", type: "select", options: ["Birthday", "Anniversary", "Other"] },
-            { key: "colours", label: "Colours you would like", type: "text", placeholder: "e.g. pink and white" },
-            { key: "card", label: "Message for the card", type: "textarea" },
-            { key: "pickup", label: "Preferred pickup place (optional)", type: "text", placeholder: "Where would you like to pick up?" },
-            { key: "extra", label: "Anything else?", type: "textarea" }
-          ]
-        },
-        cases: {
-          label: "Custom Phone Cases",
-          fields: [
-            { key: "name", label: "Your name", type: "text", autocomplete: "name", required: true },
-            { key: "phone", label: "Your phone number", type: "tel", autocomplete: "tel", required: true },
-            { key: "instagram", label: "Your Instagram handle (optional)", type: "text", placeholder: "@yourhandle" },
-            { key: "email", label: "Your email (optional)", type: "email", placeholder: "you@example.com", autocomplete: "email" },
-            { key: "model", label: "Your phone model", type: "text", placeholder: "e.g. iPhone 14, Galaxy S23" },
-            { key: "design", label: "Pick a design", type: "select", item: true, options: ["Floral Embroidered", "Flame", "Flame Grey", "Zebra", "Let's Ride", "Spider-Man", "Om Hand", "Shinchan", "Tom & Jerry", "Crochet Bow", "My own design"] },
-            { key: "own", label: "Your own design — link to your picture or your Instagram handle", type: "text", placeholder: "Paste the link, or write your @handle" },
-            { key: "pickup", label: "Preferred pickup place (optional)", type: "text", placeholder: "Where would you like to pick up?" },
-            { key: "extra", label: "Anything else?", type: "textarea" }
-          ]
-        },
-        henna: {
-          label: "Henna (Mehndi)",
-          fields: [
-            { key: "name", label: "Your name", type: "text", autocomplete: "name", required: true },
-            { key: "phone", label: "Your phone number", type: "tel", autocomplete: "tel", required: true },
-            { key: "instagram", label: "Your Instagram handle (optional)", type: "text", placeholder: "@yourhandle" },
-            { key: "email", label: "Your email (optional)", type: "email", placeholder: "you@example.com", autocomplete: "email" },
-            { key: "date", label: "Date you need it", type: "date" },
-            { key: "occasion", label: "Occasion", type: "select", options: ["Wedding / Bridal", "Party", "Festival", "Just for fun"] },
-            { key: "design", label: "Which design?", type: "select", item: true, options: ["Floral Henna", "Bridal Henna", "Traditional Henna", "Party Henna"] },
-            { key: "hands", label: "One hand or both hands?", type: "select", options: ["One hand", "Both hands"] },
-            { key: "pickup", label: "Preferred pickup place (optional)", type: "text", placeholder: "Where would you like to pick up?" },
-            { key: "extra", label: "Anything else?", type: "textarea" }
-          ]
-        },
-        sketches: {
-          label: "Art & Sketches",
-          fields: [
-            { key: "name", label: "Your name", type: "text", autocomplete: "name", required: true },
-            { key: "phone", label: "Your phone number", type: "tel", autocomplete: "tel", required: true },
-            { key: "instagram", label: "Your Instagram handle (optional)", type: "text", placeholder: "@yourhandle" },
-            { key: "email", label: "Your email (optional)", type: "email", placeholder: "you@example.com", autocomplete: "email" },
-            { key: "subject", label: "What would you like drawn?", type: "textarea", item: true, placeholder: "e.g. my dog, a portrait, a cartoon character…" },
-            { key: "medium", label: "Pencil or colour?", type: "select", options: ["Pencil", "Colour"] },
-            { key: "size", label: "Size", type: "select", options: ["Small", "Medium", "Large"] },
-            { key: "ref", label: "Link to a reference photo or your Instagram handle", type: "text", placeholder: "Paste the link, or write your @handle" },
-            { key: "pickup", label: "Preferred pickup place (optional)", type: "text", placeholder: "Where would you like to pick up?" },
-            { key: "extra", label: "Anything else?", type: "textarea" }
-          ]
-        },
-        accessories: {
-          label: "Accessories & More",
-          fields: [
-            { key: "name", label: "Your name", type: "text", autocomplete: "name", required: true },
-            { key: "phone", label: "Your phone number", type: "tel", autocomplete: "tel", required: true },
-            { key: "instagram", label: "Your Instagram handle (optional)", type: "text", placeholder: "@yourhandle" },
-            { key: "email", label: "Your email (optional)", type: "email", placeholder: "you@example.com", autocomplete: "email" },
-            { key: "item", label: "Which item?", type: "select", item: true, options: ["Hand-Painted Tribal Cap", "Spider-Man Cap", "Phone Slings for Navratri", "Spider-Man Keychain", "Jersey Keychain", "Blue Lippan Wall Art", "Men's Embroidered Kurta"] },
-            { key: "pickup", label: "Preferred pickup place (optional)", type: "text", placeholder: "Where would you like to pick up?" },
-            { key: "extra", label: "Anything else?", type: "textarea" }
-          ]
-        },
-        customised: {
-          label: "Customised Products",
-          fields: [
-            { key: "name", label: "Your name", type: "text", autocomplete: "name", required: true },
-            { key: "phone", label: "Your phone number", type: "tel", autocomplete: "tel", required: true },
-            { key: "instagram", label: "Your Instagram handle (optional)", type: "text", placeholder: "@yourhandle" },
-            { key: "email", label: "Your email (optional)", type: "email", placeholder: "you@example.com", autocomplete: "email" },
-            { key: "custom", label: "What would you like customised?", type: "textarea", big: true },
-            { key: "imglink", label: "Link of image (optional)", type: "text", placeholder: "Paste the link to your picture here" },
-            { key: "pickup", label: "Preferred pickup place (optional)", type: "text", placeholder: "Where would you like to pick up?" },
-            { key: "extra", label: "Anything else?", type: "textarea" }
-          ]
-        }
-      };
+      // One common order form for every category: the customer picks
+      // items and quantities and gives their details just once.
+      var COMMON_FIELDS = [
+        { key: "name", label: "Your name", type: "text", autocomplete: "name", required: true },
+        { key: "phone", label: "Your phone number", type: "tel", autocomplete: "tel", required: true },
+        { key: "instagram", label: "Your Instagram handle (optional)", type: "text", placeholder: "@yourhandle" },
+        { key: "email", label: "Your email (optional)", type: "email", placeholder: "you@example.com", autocomplete: "email" },
+        { key: "pickup", label: "Preferred pickup place (optional)", type: "text", placeholder: "Where would you like to pick up?" },
+        { key: "extra", label: "Anything else? Colours, phone model, henna date, card message, link to your picture…", type: "textarea", placeholder: "Anything else Priya should know?" }
+      ];
 
-      // Hidden backend: each category saves to its own Google Form.
+      // Hidden backend: every order goes to the one general Google Form.
       // The customer never sees Google — the site POSTs directly to formResponse.
-      var GOOGLE_FORMS = {
-        bouquets: {
-          url: "https://docs.google.com/forms/d/e/1FAIpQLSeGo84rl0AQzxOwxiSZcTL2jt-h4CtC1BeS9AiaUkm4MRMI7g/formResponse",
-          entries: {
-            name: "entry.1746011525",
-            phone: "entry.972295587",
-            instagram: "entry.386163979",
-            email: "entry.1400688511",
-            item: "entry.546876189",
-            occasion: "entry.1711967121",
-            colours: "entry.6282315",
-            card: "entry.1757255618",
-            pickup: "entry.1750774832",
-            extra: "entry.890720856"
-          }
-        },
-        cases: {
-          url: "https://docs.google.com/forms/d/e/1FAIpQLSeWrnmDr-fO_U6DmSLKn_bFBgIoEj75fqGcz0wynpX_51N9dw/formResponse",
-          entries: {
-            name: "entry.1449467890",
-            phone: "entry.1391306836",
-            instagram: "entry.512749087",
-            email: "entry.929710143",
-            model: "entry.1057164309",
-            design: "entry.1601979338",
-            own: "entry.744335418",
-            pickup: "entry.1572394542",
-            extra: "entry.956811125"
-          }
-        },
-        henna: {
-          url: "https://docs.google.com/forms/d/e/1FAIpQLScxFHRKef-thmUmHJGpGy3XpiHJmUHG-sgbm2IhIrDEku6u1A/formResponse",
-          entries: {
-            name: "entry.696539098",
-            phone: "entry.537246613",
-            instagram: "entry.1632353347",
-            email: "entry.1559656692",
-            date: "entry.463050343",
-            occasion: "entry.105306065",
-            design: "entry.1109365551",
-            hands: "entry.47755739",
-            pickup: "entry.1935138960",
-            extra: "entry.1926611588"
-          }
-        },
-        sketches: {
-          url: "https://docs.google.com/forms/d/e/1FAIpQLSfERZhOELFflOzl87eV5fndK1bFx6mbCoBORwNg3TAVYEvWDw/formResponse",
-          entries: {
-            name: "entry.76653161",
-            phone: "entry.1024880268",
-            instagram: "entry.871247048",
-            email: "entry.177038099",
-            subject: "entry.775282054",
-            medium: "entry.460019582",
-            size: "entry.1412239708",
-            ref: "entry.206801864",
-            pickup: "entry.1040253516",
-            extra: "entry.1055953765"
-          }
-        },
-        accessories: {
-          url: "https://docs.google.com/forms/d/e/1FAIpQLSe9pe7ibtWuv3Tre69RShg5zlfVrktVaMmCUNAVhTA1VU0EFw/formResponse",
-          entries: {
-            name: "entry.1506941380",
-            phone: "entry.1501600151",
-            instagram: "entry.1189633656",
-            email: "entry.2083940077",
-            item: "entry.507740521",
-            pickup: "entry.136320190",
-            extra: "entry.1177656828"
-          }
-        },
-        customised: {
-          url: "https://docs.google.com/forms/d/e/1FAIpQLSdtzWr_yj47nWp1u5X6gBj-e98LprHgHAfcK3-ndHZeXD5gxg/formResponse",
-          entries: {
-            name: "entry.1153629202",
-            phone: "entry.890348545",
-            instagram: "entry.1339378271",
-            email: "entry.1119576195",
-            custom: "entry.1070202613",
-            imglink: "entry.1594753515",
-            pickup: "entry.1563491915",
-            extra: "entry.330993895"
-          }
+      var GOOGLE_FORM_GENERAL = {
+        url: "https://docs.google.com/forms/d/e/1FAIpQLSf7tfxRe-TN2P5O9fe-Ym1zayZ-_nbSxyO02nYxVEx81i32aQ/formResponse",
+        entries: {
+          name: "entry.334751007",
+          phone: "entry.563207258",
+          instagram: "entry.356983927",
+          email: "entry.444795959",
+          items: "entry.381619547",
+          pickup: "entry.1521212758",
+          extra: "entry.938122726"
         }
       };
 
@@ -1113,9 +973,15 @@
       // is not subject to CORS and goes through everywhere; the hidden
       // iframe keeps the customer on this page and its load event is
       // our delivery confirmation.
-      function submitToGoogleForm(cat, values) {
-        var cfg = GOOGLE_FORMS[cat];
-        if (!cfg) return Promise.reject(new Error("Unknown category"));
+      // Submits through a hidden form + hidden iframe instead of fetch().
+      // fetch() with mode:"no-cors" is blocked outright in many phone
+      // webviews and in-app browsers, which made orders fail with
+      // "couldn't send" even on a good connection. A classic form POST
+      // is not subject to CORS and goes through everywhere; the hidden
+      // iframe keeps the customer on this page and its load event is
+      // our delivery confirmation.
+      function submitToGoogleForm(values) {
+        var cfg = GOOGLE_FORM_GENERAL;
         return new Promise(function (resolve, reject) {
           var frameName = "gf-sink-" + Date.now();
           var iframe = document.createElement("iframe");
@@ -1127,20 +993,8 @@
           form.action = cfg.url;
           form.target = frameName;
           form.style.display = "none";
-          ORDER_FORMS[cat].fields.forEach(function (f) {
-            var entryId = cfg.entries[f.key];
-            if (!entryId) return;
-            var val = values[f.key] || "";
-            if (f.type === "date" && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
-              // Google Forms date questions only accept the date split
-              // into separate year / month / day entries.
-              var parts = val.split("-");
-              addHiddenInput(form, entryId + "_year", parts[0]);
-              addHiddenInput(form, entryId + "_month", parts[1]);
-              addHiddenInput(form, entryId + "_day", parts[2]);
-            } else {
-              addHiddenInput(form, entryId, val);
-            }
+          Object.keys(cfg.entries).forEach(function (key) {
+            addHiddenInput(form, cfg.entries[key], values[key] || "");
           });
           var submitted = false;
           var done = false;
@@ -1168,43 +1022,16 @@
         });
       }
 
-      function buildOrderMessage(cat, values) {
-        var lines = ["Hi Priya! I'd like to order — " + ORDER_FORMS[cat].label];
-        ORDER_FORMS[cat].fields.forEach(function (f) {
-          var v = values[f.key];
-          if (v) lines.push(f.label + ": " + v);
+      function buildOrderMessage(values) {
+        var lines = ["Hi Priya! I'd like to order:"];
+        if (values.items) lines.push(values.items);
+        var labels = { name: "Name", phone: "Phone", instagram: "Instagram", email: "Email", pickup: "Preferred pickup place", extra: "Anything else" };
+        ["name", "phone", "instagram", "email", "pickup", "extra"].forEach(function (k) {
+          if (values[k]) lines.push(labels[k] + ": " + values[k]);
         });
         return lines.join("\n");
       }
 
-      // Product id -> the answer it maps to in its category's form.
-      var FORM_VALUE = {
-        "pink-lily": "Pink Lily Bouquet",
-        "purple-birthday": "Purple Birthday Bouquet",
-        "plush-flower": "Plush & Flower Bouquet",
-        "potted-daisy": "Flower Pot",
-        "case-floral": "Floral Embroidered",
-        "case-flame": "Flame",
-        "case-flame-grey": "Flame Grey",
-        "case-zebra": "Zebra",
-        "case-lets-ride": "Let's Ride",
-        "case-spiderman": "Spider-Man",
-        "case-om": "Om Hand",
-        "case-shinchan": "Shinchan",
-        "case-tom-jerry": "Tom & Jerry",
-        "case-crochet-bow": "Crochet Bow",
-        "acc-cap-tribal": "Hand-Painted Tribal Cap",
-        "acc-cap-spiderman": "Spider-Man Cap",
-        "acc-sling-navratri": "Phone Slings for Navratri",
-        "acc-keychain-spiderman": "Spider-Man Keychain",
-        "acc-keychain-jersey": "Jersey Keychain",
-        "acc-lippan-blue": "Blue Lippan Wall Art",
-        "acc-kurta": "Men's Embroidered Kurta",
-        "henna-floral": "Floral Henna",
-        "henna-bridal": "Bridal Henna",
-        "henna-traditional": "Traditional Henna",
-        "henna-party": "Party Henna"
-      };
       var sendIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>';
 
       var CATEGORIES = [
@@ -1422,7 +1249,7 @@
           btn.addEventListener("click", function () {
             var p = productById(btn.getAttribute("data-customise"));
             openPanel("chat", null, p.category);
-            setItemField(p.category, p);
+            ensureItemSelected(p);
             var ex = fieldEl("extra");
             if (ex) ex.value = "I'd like this one customised: ";
           });
@@ -1480,7 +1307,8 @@
           scrim.classList.add("open");
         });
         if (which === "chat") {
-          if (category) setChatCat(category);
+          if (category === "customised") selectCustomItem();
+          refreshItemPicker();
           if (prefill) {
             var exField = fieldEl("extra");
             if (exField) exField.value = prefill;
@@ -1560,13 +1388,8 @@
       }
 
       function renderOrderForms() {
-        var cats = [];
-        Object.keys(order).forEach(function (id) {
-          var c = productById(id).category;
-          if (cats.indexOf(c) === -1) cats.push(c);
-        });
         orderFormsEl.innerHTML = "";
-        if (!cats.length) {
+        if (!orderQtyTotal()) {
           var off = document.createElement("button");
           off.type = "button";
           off.className = "send-btn";
@@ -1575,54 +1398,39 @@
           orderFormsEl.appendChild(off);
           return;
         }
-        cats.forEach(function (c, i) {
-          var b = document.createElement("button");
-          b.type = "button";
-          b.className = "send-btn" + (i > 0 ? " alt" : "");
-          b.innerHTML = sendIcon + "Fill in the " + ORDER_FORMS[c].label + " order form";
-          b.addEventListener("click", function () { openOrderForm(c); });
-          orderFormsEl.appendChild(b);
-        });
-        if (cats.length > 1) {
-          var hint = document.createElement("p");
-          hint.className = "form-hint";
-          hint.textContent = "Your list has more than one category — one short form per category.";
-          orderFormsEl.appendChild(hint);
-        }
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "send-btn";
+        b.innerHTML = sendIcon + "Fill in the order form";
+        b.addEventListener("click", function () { openCommonForm(); });
+        orderFormsEl.appendChild(b);
+        var hint = document.createElement("p");
+        hint.className = "form-hint";
+        hint.textContent = "One form for your whole list — add your details just once.";
+        orderFormsEl.appendChild(hint);
       }
 
-      // Opens the built-in form for a category, prefilled from the order list.
-      function openOrderForm(cat) {
-        openPanel("chat", null, cat);
-        var ids = Object.keys(order).filter(function (id) { return productById(id).category === cat; });
-        if (!ids.length) return;
-        setItemField(cat, productById(ids[0]));
-        var totalQty = 0;
-        ids.forEach(function (id) { totalQty += order[id]; });
-        if (ids.length > 1 || totalQty > 1) {
-          var ex = fieldEl("extra");
-          if (ex) {
-            ex.value = "From my order list: " + ids.map(function (id) {
-              return productById(id).name + " × " + order[id];
-            }).join(", ");
-          }
-        }
+      // Opens the one common order form, quantities synced from the list.
+      function openCommonForm() {
+        openPanel("chat");
+        refreshItemPicker();
       }
 
-      // Sets the form's design/bouquet field to the given product's answer.
-      function setItemField(cat, product) {
-        var fields = ORDER_FORMS[cat].fields;
-        var def = null;
-        for (var i = 0; i < fields.length; i++) if (fields[i].item) def = fields[i];
-        if (!def) return;
-        var el = fieldEl(def.key);
-        if (!el) return;
-        el.value = def.type === "select" ? (FORM_VALUE[product.id] || "") : product.name;
+      // Makes sure a design is on the list (quantity at least 1) — used
+      // by the "Customise this" button on each design card.
+      function ensureItemSelected(p) {
+        if (!p) return;
+        if (!order[p.id]) {
+          order[p.id] = 1;
+          syncOrderUI();
+          renderGrid();
+        }
+        refreshItemPicker();
       }
 
       /* ---------- Chat (built-in order forms) ---------- */
-      var chatCat = "bouquets";
-      var formState = {};
+      /* ---------- Common order form ---------- */
+      var customQty = 0; // quantity for "my own design / customised product"
       var chatFieldsEl = document.getElementById("orderFormFields");
       var chatSubmit = document.getElementById("chatSubmit");
       var chatSentBox = document.getElementById("chatSentBox");
@@ -1631,14 +1439,32 @@
         return chatFieldsEl.querySelector('[data-key="' + key + '"]');
       }
 
-      function collectChatForm() {
+      function collectCommonForm() {
         var values = {};
-        ORDER_FORMS[chatCat].fields.forEach(function (f) {
+        COMMON_FIELDS.forEach(function (f) {
           var el = fieldEl(f.key);
           values[f.key] = el ? el.value.trim() : "";
         });
-        formState[chatCat] = values;
+        values.items = serializeItems();
         return values;
+      }
+
+      // The picked items as one "Name × qty" list — this is what lands
+      // in the form's "Items & quantities" answer.
+      function serializeItems() {
+        var lines = [];
+        Object.keys(order).forEach(function (id) {
+          var p = productById(id);
+          if (p && order[id] > 0) lines.push(p.name + " × " + order[id]);
+        });
+        if (customQty > 0) lines.push("Customised product (my own design / picture) × " + customQty);
+        return lines.join("\n");
+      }
+
+      function selectedItemCount() {
+        var n = customQty;
+        for (var k in order) n += order[k];
+        return n;
       }
 
       /* ---------- Indian mobile number validation ---------- */
@@ -1646,28 +1472,39 @@
       // leading 0, then requires exactly 10 digits starting with 6, 7, 8
       // or 9 — the only starting digits Indian mobile numbers use.
       // Returns the clean 10-digit number, or null when it isn't valid.
+      // Catches obviously made-up numbers that pass the basic pattern:
+      // one digit repeated 8 or more times (6100000000, 9999999999),
+      // or a strictly running sequence (1234567890, 9876543210).
+      function looksFakeMobile(digits) {
+        var counts = {};
+        var max = 0;
+        for (var i = 0; i < digits.length; i++) {
+          counts[digits[i]] = (counts[digits[i]] || 0) + 1;
+          if (counts[digits[i]] > max) max = counts[digits[i]];
+        }
+        if (max >= 8) return true;
+        var asc = true, desc = true;
+        for (var j = 1; j < digits.length; j++) {
+          var prev = digits.charCodeAt(j - 1) - 48;
+          var cur = digits.charCodeAt(j) - 48;
+          if ((prev + 1) % 10 !== cur) asc = false;
+          if ((prev + 9) % 10 !== cur) desc = false;
+        }
+        return asc || desc;
+      }
+
       function parseIndianMobile(raw) {
         var digits = String(raw || "").replace(/\D/g, "");
         if (digits.length === 12 && digits.indexOf("91") === 0) digits = digits.slice(2);
         else if (digits.length === 11 && digits.charAt(0) === "0") digits = digits.slice(1);
         if (!/^[6-9]\d{9}$/.test(digits)) return null;
+        if (looksFakeMobile(digits)) return null;
         return digits;
       }
 
-      // Plain-language reason a number fails, shown under the field.
-      function indianMobileError(raw) {
-        var digits = String(raw || "").replace(/\D/g, "");
-        if (!digits) return "Please enter your mobile number";
-        var core = digits;
-        if (core.length === 12 && core.indexOf("91") === 0) core = core.slice(2);
-        else if (core.length === 11 && core.charAt(0) === "0") core = core.slice(1);
-        if (core.length < 10) return "Too short — an Indian mobile number has 10 digits (you've entered " + core.length + ")";
-        if (core.length > 10) return "Too long — an Indian mobile number has 10 digits";
-        if (!/^[6-9]/.test(core)) return "Indian mobile numbers start with 6, 7, 8 or 9 — please check the number";
-        return "That doesn't look like a valid Indian mobile number — please check it";
-      }
-
       // Live feedback under the phone field while the customer types.
+      // Live feedback under the phone field while the customer types —
+      // kept simple: "Valid number" or "Not valid", nothing more.
       function validatePhoneField(el, statusEl, showError) {
         var digits = el.value.replace(/\D/g, "");
         var valid = parseIndianMobile(el.value) !== null;
@@ -1679,47 +1516,111 @@
           return false;
         }
         if (valid) {
-          statusEl.textContent = "✓ Valid Indian mobile number";
+          statusEl.textContent = "Valid number";
           statusEl.className = "phone-status is-ok";
           el.removeAttribute("aria-invalid");
           return true;
         }
-        if (showError || digits.length >= 10) {
-          statusEl.textContent = indianMobileError(el.value);
-          statusEl.className = "phone-status is-error";
-          el.setAttribute("aria-invalid", "true");
-        } else {
-          statusEl.textContent = digits.length + " of 10 digits";
-          statusEl.className = "phone-status";
-          el.removeAttribute("aria-invalid");
-        }
+        statusEl.textContent = "Not valid";
+        statusEl.className = "phone-status is-error";
+        el.setAttribute("aria-invalid", "true");
         return false;
       }
 
-      function renderChatForm() {
-        var def = ORDER_FORMS[chatCat];
-        var saved = formState[chatCat] || {};
+      function buildPickRow(p) {
+        var row = document.createElement("div");
+        row.className = "pick-row";
+        row.innerHTML = '<span class="pick-name">' + p.name + '</span>' +
+          '<span class="qty"><button type="button" aria-label="One less ' + p.name + '">−</button><span data-pick-count="' + p.id + '">0</span><button type="button" aria-label="One more ' + p.name + '">+</button></span>';
+        var btns = row.querySelectorAll(".qty button");
+        btns[0].addEventListener("click", function () {
+          if (order[p.id]) {
+            order[p.id]--;
+            if (order[p.id] <= 0) delete order[p.id];
+            syncOrderUI(); renderGrid(); refreshItemPicker();
+          }
+        });
+        btns[1].addEventListener("click", function () {
+          order[p.id] = (order[p.id] || 0) + 1;
+          syncOrderUI(); renderGrid(); refreshItemPicker();
+        });
+        return row;
+      }
+
+      function buildItemsSection() {
+        var wrap = document.createElement("div");
+        wrap.className = "items-head";
+        wrap.id = "itemsSection";
+        wrap.innerHTML = '<p class="form-picker-label">What would you like to order? *</p>' +
+          '<p class="items-hint">Tap + to add an item and pick how many. Everything goes in this one order.</p>';
+        CATEGORIES.forEach(function (c) {
+          if (c.id === "all") return;
+          var title = document.createElement("p");
+          title.className = "item-group-title";
+          title.textContent = c.name;
+          wrap.appendChild(title);
+          PRODUCTS.forEach(function (p) {
+            if (p.category === c.id) wrap.appendChild(buildPickRow(p));
+          });
+        });
+        var cTitle = document.createElement("p");
+        cTitle.className = "item-group-title";
+        cTitle.textContent = "Customised Products";
+        wrap.appendChild(cTitle);
+        var row = document.createElement("div");
+        row.className = "pick-row";
+        row.innerHTML = '<span class="pick-name">My own design / customised product<small>Describe it or paste a picture link in the notes below</small></span>' +
+          '<span class="qty"><button type="button" aria-label="One less customised product">−</button><span data-pick-count="custom">0</span><button type="button" aria-label="One more customised product">+</button></span>';
+        var cBtns = row.querySelectorAll(".qty button");
+        cBtns[0].addEventListener("click", function () { if (customQty > 0) customQty--; refreshItemPicker(); });
+        cBtns[1].addEventListener("click", function () { customQty++; refreshItemPicker(); });
+        wrap.appendChild(row);
+        var summary = document.createElement("p");
+        summary.className = "items-summary";
+        summary.id = "itemsSummary";
+        wrap.appendChild(summary);
+        return wrap;
+      }
+
+      function refreshItemPicker() {
+        if (!chatFieldsEl) return;
+        chatFieldsEl.querySelectorAll("[data-pick-count]").forEach(function (span) {
+          var id = span.getAttribute("data-pick-count");
+          var n = id === "custom" ? customQty : (order[id] || 0);
+          span.textContent = n;
+          var row = span.parentNode && span.parentNode.parentNode;
+          if (row && row.classList) row.classList.toggle("is-selected", n > 0);
+        });
+        var summary = document.getElementById("itemsSummary");
+        if (summary) {
+          var n = selectedItemCount();
+          summary.innerHTML = n ? "<strong>" + n + (n === 1 ? " item" : " items") + "</strong> in this order" : "No items picked yet — tap + above.";
+        }
+      }
+
+      function selectCustomItem() {
+        if (customQty < 1) customQty = 1;
+        refreshItemPicker();
+      }
+
+      function renderCommonForm() {
         chatFieldsEl.innerHTML = "";
-        def.fields.forEach(function (f) {
+        COMMON_FIELDS.forEach(function (f) {
           var div = document.createElement("div");
           div.className = "field";
-          var id = "of-" + chatCat + "-" + f.key;
+          var id = "of-" + f.key;
           var label = f.label + (f.required ? " *" : "");
           var ph = f.placeholder ? ' placeholder="' + f.placeholder + '"' : "";
-          if (f.type === "select") {
-            var opts = '<option value="">Pick one…</option>';
-            f.options.forEach(function (o) { opts += '<option value="' + o + '">' + o + "</option>"; });
-            div.innerHTML = '<label for="' + id + '">' + label + '</label><select id="' + id + '" data-key="' + f.key + '">' + opts + "</select>";
-          } else if (f.type === "textarea") {
-            div.innerHTML = '<label for="' + id + '">' + label + '</label><textarea id="' + id + '" data-key="' + f.key + '"' + ph + (f.big ? ' style="min-height:130px"' : "") + "></textarea>";
+          if (f.type === "textarea") {
+            div.innerHTML = '<label for="' + id + '">' + label + '</label><textarea id="' + id + '" data-key="' + f.key + '"' + ph + "></textarea>";
           } else if (f.key === "phone") {
             div.innerHTML = '<label for="' + id + '">' + label + '</label><div class="phone-wrap"><span class="phone-prefix" aria-hidden="true">+91</span><input id="' + id + '" data-key="' + f.key + '" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="15" placeholder="98765 43210" aria-describedby="' + id + '-status" /></div><p class="phone-status" id="' + id + '-status" role="status">10-digit Indian mobile number, starting with 6, 7, 8 or 9</p>';
           } else {
             div.innerHTML = '<label for="' + id + '">' + label + '</label><input id="' + id + '" data-key="' + f.key + '" type="' + f.type + '"' + (f.autocomplete ? ' autocomplete="' + f.autocomplete + '"' : "") + ph + " />";
           }
           chatFieldsEl.appendChild(div);
-          var el = div.querySelector("[data-key]");
           if (f.key === "phone") {
+            var el = div.querySelector("[data-key]");
             var statusEl = div.querySelector(".phone-status");
             var formatPhone = function (showError) {
               var digits = el.value.replace(/\D/g, "");
@@ -1736,37 +1637,20 @@
             };
             el.addEventListener("input", function () { formatPhone(false); });
             el.addEventListener("blur", function () { formatPhone(true); });
-            if (saved[f.key]) { el.value = saved[f.key]; formatPhone(false); }
-          } else if (saved[f.key]) {
-            el.value = saved[f.key];
           }
+          if (f.key === "email") chatFieldsEl.appendChild(buildItemsSection());
         });
-        if (chatCat === "customised") {
-          var note = document.createElement("p");
-          note.className = "custom-note";
-          note.innerHTML = 'Have a picture to share? DM it to Priya on Instagram <a href="https://www.instagram.com/priyaa.createss/" target="_blank" rel="noopener noreferrer">@priyaa.createss</a>';
-          chatFieldsEl.appendChild(note);
-        }
+        var note = document.createElement("p");
+        note.className = "custom-note";
+        note.innerHTML = 'Have a picture to share? Paste its link in the notes above, or DM it to Priya on Instagram <a href="https://www.instagram.com/priyaa.createss/" target="_blank" rel="noopener noreferrer">@priyaa.createss</a>';
+        chatFieldsEl.appendChild(note);
+        refreshItemPicker();
       }
-
-      function setChatCat(c) {
-        if (!ORDER_FORMS[c]) return;
-        collectChatForm();
-        chatCat = c;
-        renderChatForm();
-        document.querySelectorAll("#formPicker [data-form-cat]").forEach(function (b) {
-          b.setAttribute("aria-pressed", b.getAttribute("data-form-cat") === c ? "true" : "false");
-        });
-      }
-      document.querySelectorAll("#formPicker [data-form-cat]").forEach(function (b) {
-        b.addEventListener("click", function () { setChatCat(b.getAttribute("data-form-cat")); });
-      });
 
       chatSubmit.addEventListener("click", function () {
-        var def = ORDER_FORMS[chatCat];
-        var values = collectChatForm();
+        var values = collectCommonForm();
         var missing = null;
-        def.fields.forEach(function (f) {
+        COMMON_FIELDS.forEach(function (f) {
           if (f.required && !values[f.key] && !missing) missing = f;
         });
         if (missing) {
@@ -1779,33 +1663,42 @@
         if (!phoneDigits) {
           showToast("Please enter a valid Indian mobile number");
           var phoneEl = fieldEl("phone");
-          var phoneStatus = document.getElementById("of-" + chatCat + "-phone-status");
+          var phoneStatus = document.getElementById("of-phone-status");
           if (phoneEl && phoneStatus) validatePhoneField(phoneEl, phoneStatus, true);
           if (phoneEl) phoneEl.focus();
           return;
         }
         values.phone = phoneDigits;
+        if (!values.items) {
+          showToast("Please pick at least one item — tap + next to what you'd like");
+          var sec = document.getElementById("itemsSection");
+          if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+          return;
+        }
         if (chatSubmit.disabled) return;
         var originalHTML = chatSubmit.innerHTML;
         chatSubmit.disabled = true;
         chatSubmit.textContent = "Sending your order…";
         chatSentBox.classList.remove("show");
         chatSentBox.innerHTML = "";
-        submitToGoogleForm(chatCat, values).then(function () {
+        submitToGoogleForm(values).then(function () {
           chatSubmit.disabled = false;
           chatSubmit.innerHTML = originalHTML;
           chatSentBox.innerHTML = '<span class="hand">thank you!</span>' +
             "<strong>Your order has been sent to Priya.</strong> She'll get in touch to confirm the price and timing. You can close this panel now.";
           chatSentBox.classList.add("show");
-          // Clear the saved answers for this category so a new order starts fresh.
-          formState[chatCat] = {};
-          renderChatForm();
+          // Order placed — clear the list and the form so a new order starts fresh.
+          order = {};
+          customQty = 0;
+          syncOrderUI();
+          renderGrid();
+          renderCommonForm();
           setTimeout(function () { chatSentBox.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, 60);
           showToast("Order sent to Priya — thank you!");
         }).catch(function () {
           chatSubmit.disabled = false;
           chatSubmit.innerHTML = originalHTML;
-          var orderText = buildOrderMessage(chatCat, values);
+          var orderText = buildOrderMessage(values);
           chatSentBox.innerHTML = '<span class="hand">hmm, that didn\'t go through</span>' +
             "Your order couldn't be sent just now. Don't lose it — your answers are saved in the form above, so you can tap <strong>Send order to Priya</strong> to try again. Or copy your order here and paste it to Priya on Instagram:" +
             '<textarea id="fallbackOrderText" readonly aria-label="Your order, ready to copy"></textarea>' +
@@ -1899,7 +1792,7 @@
       renderFilters();
       renderGrid();
       syncOrderUI();
-      setChatCat("bouquets");
+      renderCommonForm();
     </script>
   </body>
 </html>
