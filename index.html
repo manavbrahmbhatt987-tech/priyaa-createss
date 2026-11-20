@@ -23,6 +23,8 @@
         --sage: #5f7161;
         --sage-soft: #e6ebdf;
         --gold: #c99a3c;
+        --ok: #2e7d32;
+        --error: #b3261e;
         --shadow: 0 10px 30px rgba(84, 55, 25, 0.12);
         --radius: 18px;
       }
@@ -40,6 +42,8 @@
           --sage: #a9bfa5;
           --sage-soft: #2f3a2d;
           --gold: #d9ab55;
+          --ok: #9ccc8f;
+          --error: #f2a49e;
           --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
         }
       }
@@ -528,6 +532,18 @@
       .send-btn.alt { background: transparent; color: var(--accent); border: 2px solid var(--accent); }
       .send-btn.alt:hover { background: var(--bg-soft); }
       .form-hint { font-size: 0.8rem; color: var(--ink-soft); text-align: center; margin: 0.6rem 0 0; }
+      .phone-wrap { display: flex; }
+      .phone-prefix {
+        display: flex; align-items: center; padding: 0 0.7rem; flex: none;
+        border: 1.5px solid var(--line); border-right: none; border-radius: 10px 0 0 10px;
+        background: var(--bg-soft); color: var(--ink-soft); font-weight: 700; font-size: 0.95rem;
+      }
+      .phone-wrap input { border-radius: 0 10px 10px 0; }
+      .field input[aria-invalid="true"] { border-color: var(--error); }
+      .field input.phone-ok { border-color: var(--ok); }
+      .phone-status { font-size: 0.8rem; color: var(--ink-soft); text-align: left; margin: 0.35rem 0 0; min-height: 1rem; }
+      .phone-status.is-error { color: var(--error); font-weight: 700; }
+      .phone-status.is-ok { color: var(--ok); font-weight: 700; }
       .form-picker-label { font-weight: 700; font-size: 0.9rem; margin: 0 0 0.4rem; }
       .form-picker { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 0.7rem; }
       .form-picker button {
@@ -1625,6 +1641,61 @@
         return values;
       }
 
+      /* ---------- Indian mobile number validation ---------- */
+      // Accepts the number with or without a +91 / 91 country code or a
+      // leading 0, then requires exactly 10 digits starting with 6, 7, 8
+      // or 9 — the only starting digits Indian mobile numbers use.
+      // Returns the clean 10-digit number, or null when it isn't valid.
+      function parseIndianMobile(raw) {
+        var digits = String(raw || "").replace(/\D/g, "");
+        if (digits.length === 12 && digits.indexOf("91") === 0) digits = digits.slice(2);
+        else if (digits.length === 11 && digits.charAt(0) === "0") digits = digits.slice(1);
+        if (!/^[6-9]\d{9}$/.test(digits)) return null;
+        return digits;
+      }
+
+      // Plain-language reason a number fails, shown under the field.
+      function indianMobileError(raw) {
+        var digits = String(raw || "").replace(/\D/g, "");
+        if (!digits) return "Please enter your mobile number";
+        var core = digits;
+        if (core.length === 12 && core.indexOf("91") === 0) core = core.slice(2);
+        else if (core.length === 11 && core.charAt(0) === "0") core = core.slice(1);
+        if (core.length < 10) return "Too short — an Indian mobile number has 10 digits (you've entered " + core.length + ")";
+        if (core.length > 10) return "Too long — an Indian mobile number has 10 digits";
+        if (!/^[6-9]/.test(core)) return "Indian mobile numbers start with 6, 7, 8 or 9 — please check the number";
+        return "That doesn't look like a valid Indian mobile number — please check it";
+      }
+
+      // Live feedback under the phone field while the customer types.
+      function validatePhoneField(el, statusEl, showError) {
+        var digits = el.value.replace(/\D/g, "");
+        var valid = parseIndianMobile(el.value) !== null;
+        el.classList.toggle("phone-ok", valid);
+        if (!digits) {
+          statusEl.textContent = "10-digit Indian mobile number, starting with 6, 7, 8 or 9";
+          statusEl.className = "phone-status";
+          el.removeAttribute("aria-invalid");
+          return false;
+        }
+        if (valid) {
+          statusEl.textContent = "✓ Valid Indian mobile number";
+          statusEl.className = "phone-status is-ok";
+          el.removeAttribute("aria-invalid");
+          return true;
+        }
+        if (showError || digits.length >= 10) {
+          statusEl.textContent = indianMobileError(el.value);
+          statusEl.className = "phone-status is-error";
+          el.setAttribute("aria-invalid", "true");
+        } else {
+          statusEl.textContent = digits.length + " of 10 digits";
+          statusEl.className = "phone-status";
+          el.removeAttribute("aria-invalid");
+        }
+        return false;
+      }
+
       function renderChatForm() {
         var def = ORDER_FORMS[chatCat];
         var saved = formState[chatCat] || {};
@@ -1642,18 +1713,32 @@
           } else if (f.type === "textarea") {
             div.innerHTML = '<label for="' + id + '">' + label + '</label><textarea id="' + id + '" data-key="' + f.key + '"' + ph + (f.big ? ' style="min-height:130px"' : "") + "></textarea>";
           } else if (f.key === "phone") {
-            div.innerHTML = '<label for="' + id + '">' + label + '</label><input id="' + id + '" data-key="' + f.key + '" type="tel" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" autocomplete="tel" placeholder="10-digit mobile number" aria-describedby="' + id + '-hint" /><p class="form-hint" id="' + id + '-hint" style="text-align:left;margin:0.35rem 0 0;">10-digit Indian mobile number</p>';
+            div.innerHTML = '<label for="' + id + '">' + label + '</label><div class="phone-wrap"><span class="phone-prefix" aria-hidden="true">+91</span><input id="' + id + '" data-key="' + f.key + '" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="15" placeholder="98765 43210" aria-describedby="' + id + '-status" /></div><p class="phone-status" id="' + id + '-status" role="status">10-digit Indian mobile number, starting with 6, 7, 8 or 9</p>';
           } else {
             div.innerHTML = '<label for="' + id + '">' + label + '</label><input id="' + id + '" data-key="' + f.key + '" type="' + f.type + '"' + (f.autocomplete ? ' autocomplete="' + f.autocomplete + '"' : "") + ph + " />";
           }
           chatFieldsEl.appendChild(div);
           var el = div.querySelector("[data-key]");
-          if (saved[f.key]) el.value = f.key === "phone" ? String(saved[f.key]).replace(/\D/g, "").slice(0, 10) : saved[f.key];
           if (f.key === "phone") {
-            el.addEventListener("input", function () {
-              var cleaned = el.value.replace(/\D/g, "").slice(0, 10);
-              if (el.value !== cleaned) el.value = cleaned;
-            });
+            var statusEl = div.querySelector(".phone-status");
+            var formatPhone = function (showError) {
+              var digits = el.value.replace(/\D/g, "");
+              // A typed or pasted +91 / 91 code or leading 0 is dropped —
+              // the +91 is already shown in front of the box.
+              if (digits.length > 10) {
+                if (digits.length === 12 && digits.indexOf("91") === 0) digits = digits.slice(2);
+                else if (digits.length === 11 && digits.charAt(0) === "0") digits = digits.slice(1);
+                else digits = digits.slice(0, 10);
+              }
+              var pretty = digits.length > 5 ? digits.slice(0, 5) + " " + digits.slice(5) : digits;
+              if (el.value !== pretty) el.value = pretty;
+              validatePhoneField(el, statusEl, showError);
+            };
+            el.addEventListener("input", function () { formatPhone(false); });
+            el.addEventListener("blur", function () { formatPhone(true); });
+            if (saved[f.key]) { el.value = saved[f.key]; formatPhone(false); }
+          } else if (saved[f.key]) {
+            el.value = saved[f.key];
           }
         });
         if (chatCat === "customised") {
@@ -1690,10 +1775,12 @@
           if (bad) bad.focus();
           return;
         }
-        var phoneDigits = (values.phone || "").replace(/\D/g, "");
-        if (!/^\d{10}$/.test(phoneDigits)) {
-          showToast("Please enter a 10-digit mobile number");
+        var phoneDigits = parseIndianMobile(values.phone);
+        if (!phoneDigits) {
+          showToast("Please enter a valid Indian mobile number");
           var phoneEl = fieldEl("phone");
+          var phoneStatus = document.getElementById("of-" + chatCat + "-phone-status");
+          if (phoneEl && phoneStatus) validatePhoneField(phoneEl, phoneStatus, true);
           if (phoneEl) phoneEl.focus();
           return;
         }
