@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="icon" href="data:," />
+    <link rel="icon" type="image/png" href="logo.png" />
     <title>Priyaa Createss — Handmade by Priya, Made to Order</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -92,9 +92,7 @@
       .brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: var(--ink); margin-right: auto; min-width: 0; }
       .brand-mark {
         width: 40px; height: 40px; flex: none; border-radius: 50%;
-        background: var(--accent); color: var(--accent-ink);
-        display: grid; place-items: center;
-        font-family: "Playfair Display", serif; font-weight: 900; font-size: 1.15rem;
+        object-fit: cover; display: block;
       }
       .brand-name { font-family: "Playfair Display", serif; font-weight: 900; font-size: 1.2rem; line-height: 1; white-space: nowrap; }
       .brand-sub { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; white-space: nowrap; }
@@ -121,7 +119,7 @@
       @media (max-width: 520px) {
         .brand-name { font-size: 1.02rem; }
         .brand-sub { font-size: 0.6rem; letter-spacing: 0.1em; }
-        .brand-mark { width: 34px; height: 34px; font-size: 1rem; }
+        .brand-mark { width: 34px; height: 34px; }
         .order-btn { padding: 0.6rem 0.85rem; font-size: 0.88rem; gap: 0.4rem; }
         .topbar-inner { padding: 0.6rem 0.8rem; gap: 0.55rem; }
       }
@@ -602,7 +600,7 @@
     <header class="topbar">
       <div class="topbar-inner">
         <a class="brand" href="#top" aria-label="Priyaa Createss — home">
-          <span class="brand-mark" aria-hidden="true">P</span>
+          <img class="brand-mark" src="logo.png" alt="Priyaa Createss logo" />
           <span>
             <span class="brand-name">Priyaa Createss</span><br />
             <span class="brand-sub">Handmade by Priya · By order only</span>
